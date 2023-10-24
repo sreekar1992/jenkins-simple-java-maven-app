@@ -1,7 +1,7 @@
 pipeline {
     agent { label 'linux' }
     stages {
-        stage('Build') {
+        stage('Build using maven package') {
             steps {
                 sh 'mvn -B -DskipTests clean package'
             }
