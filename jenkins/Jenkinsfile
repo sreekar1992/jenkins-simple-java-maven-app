@@ -1,10 +1,9 @@
 pipeline {
-    agent any
+    agent linux
     stages {
         stage('Build') {
             steps {
-                bash who
-                //'C:\Users\adityatanwar\AppData\Local\Programs\Git\bin\sh.exe' 'mvn -B -DskipTests clean package'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
         stage('Test') {
