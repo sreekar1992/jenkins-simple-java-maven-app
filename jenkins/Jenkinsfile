@@ -3,7 +3,8 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                'C:\Users\adityatanwar\AppData\Local\Programs\Git\bin\sh.exe' 'mvn -B -DskipTests clean package'
+                bash who
+                //'C:\Users\adityatanwar\AppData\Local\Programs\Git\bin\sh.exe' 'mvn -B -DskipTests clean package'
             }
         }
         stage('Test') {
