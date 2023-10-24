@@ -1,14 +1,28 @@
 pipeline {
-    agent { label 'linux' }
+    agent {
+        label 'linux'
+    } // end of agent
+
     stages {
-        stage('Build using maven package') {
+
+        stage('Git-Checkout') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
+                git credentialsId: 'github creds', poll: false, url: 'https://github.com/aditya-tanwar/jenkins-simple-java-maven-app.git'
+            }
+        } // end of Git-Checkout stage
+    
+
+        stage('Maven-Validation/Compilation') {
+            steps {
+                sh "mvn validate" // validate the project is correct and all necessary information is available 
+                sh "mvn clean compile -DskipTests=true" // compiles the source code of the project
+                sh "mvn test" // testing the compiled code 
             }
         }
-        stage('Test') {
+
+        stage('Maven-Unit-Testing') {
             steps {
-                sh 'mvn test'
+                sh "mvn test" // testing the compiled code 
             }
             post {
                 always {
@@ -16,10 +30,43 @@ pipeline {
                 }
             }
         }
-        stage('Deliver') {
+
+
+        stage('OWASP-scan') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'owasp'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+
+            }
+        }
+
+        stage('Maven-Build') {
+            steps {
+                sh "mvn clean package -DskipTests=true" // build the maven project and create JAR & WAR file.
+            }
+        } // end of the Maven-Build stage
+
+   
+        stage('Push to Docker Registry') {
+            steps {
+                        
+                // These steps are basically going to create a docker image using the docker file 
+                // that is using the the maven generated jar file to deploy the application.
+
+                sh "docker build -t my-app-java -f docker/Dockerfile ."
+                sh "docker tag my-app-java adityatanwar03/my-app-java:latest"
+                sh "docker push adityatanwar03/my-app-java:latest"
+
+                }
+                
+        }
+
+         stage('Deliver') { // For continous delivery through jenkins 
             steps {
                 sh './jenkins/scripts/deliver.sh'
             }
-        }
+        
     }
+
 }
+    
