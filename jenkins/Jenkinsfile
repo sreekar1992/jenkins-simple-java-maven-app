@@ -1,54 +1,25 @@
 pipeline {
-    agent {
-        label 'linux'
-    } // end of agent
-
+    agent { label 'linux' }
     stages {
-
-        stage('Git-Checkout') {
+        stage('Build using maven package') {
             steps {
-                git credentialsId: 'github creds', poll: false, url: 'https://github.com/aditya-tanwar/jenkins-simple-java-maven-app.git'
-            }
-        } // end of Git-Checkout stage
-    
-
-        stage('Maven-Compile') {
-            steps {
-                sh "mvn validate" // validate the project is correct and all necessary information is available 
-                sh "mvn clean compile -DskipTests=true" // compiles the source code of the project
+                sh 'mvn -B -DskipTests clean package'
             }
         }
-
-
-        stage('OWASP-scan') {
+        stage('Test') {
             steps {
-                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'owasp'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-
+                sh 'mvn test'
             }
-        }
-
-        stage('Maven-Build') {
-            steps {
-                sh "mvn clean package -DskipTests=true" // build the maven project and create JAR & WAR file.
-            }
-        } // end of the Maven-Build stage
-
-   
-        stage('Push to Docker Registry') {
-            steps {
-                        
-                // These steps are basically going to create a docker image using the docker file 
-                // that is using the the maven generated jar file to deploy the application.
-
-                sh "docker build -t my-app-java -f docker/Dockerfile ."
-                sh "docker tag my-app-java adityatanwar03/my-app-java:latest"
-                sh "docker push adityatanwar03/my-app-java:latest"
-
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
                 }
-                
+            }
+        }
+        stage('Deliver') {
+            steps {
+                sh './jenkins/scripts/deliver.sh'
+            }
         }
     }
-
 }
-    
