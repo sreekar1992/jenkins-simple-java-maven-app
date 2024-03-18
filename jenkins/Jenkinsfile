@@ -4,6 +4,8 @@ pipeline {
     } // end of agent
     environment {
         SONAR_TOKEN = credentials('sonar-token3')
+        DOCKER_IMAGE_NAME = 'myapp'
+        ECR_REGISTRY_URL = '637423647428.dkr.ecr.us-east-1.amazonaws.com'
     stages {
 
         stage('Git-Checkout') {
@@ -53,6 +55,29 @@ pipeline {
                 sh "mvn clean package -DskipTests=true" // build the maven project and create JAR & WAR file.
             }
         } // end of the Maven-Build stage
+
+        stage('Build Docker Image') {
+            steps {
+                // Build Docker image
+                script {
+                    docker.build("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}")
+                }
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                // Log in to AWS ECR
+                script {
+                    withAWS(region: 'your-region', credentials: 'aws-credentials-id') {
+                        docker.withRegistry(ECR_REGISTRY_URL, 'ecr:your-region') {
+                            // Push Docker image to ECR
+                            docker.image("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}").push()
+                        }
+                    }
+                }
+            }
+        }
 
    
         stage('Push to Docker Registry') {
