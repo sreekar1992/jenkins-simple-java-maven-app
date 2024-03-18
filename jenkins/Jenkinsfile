@@ -2,7 +2,8 @@ pipeline {
     agent {
         label 'linux'
     } // end of agent
-
+    environment {
+        SONAR_TOKEN = credentials('sonar-token3')
     stages {
 
         stage('Git-Checkout') {
@@ -31,6 +32,14 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                // Run SonarQube analysis
+                withSonarQubeEnv('SonarQube') {
+                    sh "mvn sonar:sonar -Dsonar.login=${env.SONAR_TOKEN}"
+                }
+            }
+        }
 
         stage('OWASP-scan') {
             steps {
@@ -68,6 +77,6 @@ pipeline {
          }    
         
     }
-
+    }
 }
     
