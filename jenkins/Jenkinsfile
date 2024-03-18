@@ -7,7 +7,7 @@ pipeline {
 
         stage('Git-Checkout') {
             steps {
-                git credentialsId: 'github creds', poll: false, url: 'https://github.com/aditya-tanwar/jenkins-simple-java-maven-app.git'
+                git credentialsId: 'github creds', poll: false, url: 'https://github.com/sreekar1992/jenkins-simple-java-maven-app.git'
             }
         } // end of Git-Checkout stage
     
