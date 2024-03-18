@@ -62,8 +62,8 @@ pipeline {
                 // that is using the the maven generated jar file to deploy the application.
 
                 sh "docker build -t my-app-java -f docker/Dockerfile ."
-                sh "docker tag my-app-java sreekar1992/javatest:tagname"
-                sh "docker push sreekar1992/javatest:tagname"
+                sh "docker tag my-app-java sreekar1992/javatest:latest"
+                sh "docker push sreekar1992/javatest:latest"
 
                 }
                 
