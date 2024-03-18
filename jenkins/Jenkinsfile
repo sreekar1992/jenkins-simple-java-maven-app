@@ -61,8 +61,8 @@ pipeline {
                 // These steps are basically going to create a docker image using the docker file 
                 // that is using the the maven generated jar file to deploy the application.
 
-                sh "docker build -t my-app-java -f docker/Dockerfile ."
-                sh "docker tag my-app-java sreekar1992/javatest:latest"
+                sh "docker build -t javatestapp -f docker/Dockerfile ."
+                sh "docker tag javatestapp sreekar1992/javatest:latest"
                 sh "docker push sreekar1992/javatest:latest"
 
                 }
